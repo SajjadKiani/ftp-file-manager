@@ -9,6 +9,11 @@ wss.on('connection', (ws) => {
   console.log('A new client connected.');
 
   // show file directory to client
+
+  // if directory does not exist, create it
+  if (!fs.existsSync('files'))
+    fs.mkdirSync('files');
+
   fs.readdir('files', (err, files) => {
     
     if (err) {
@@ -61,7 +66,7 @@ wss.on('connection', (ws) => {
       });
     }
 
-    // // Check if the message is a command to download a file
+    // Check if the message is a command to download a file
     if (typeof message === 'string' && message.startsWith('download:')) {
       const fileName = message.split(':')[1];
       const filePath = `files/${fileName}`;
