@@ -87,21 +87,22 @@ wss.on('connection', (ws) => {
       // Check if the file exists
       console.log(filePath);
       if (fs.existsSync(filePath)) {
-        const fileStream = fs.createReadStream(filePath);
-
-        // Event: When the file is opened for reading
-        fileStream.on('open', (ws) => {
-          fileStream.read(ws)
-        });
-
-        // Event: When the file read stream is finished
-        fileStream.on('end', () => {
-          ws.send('downloadComplete');
-        });
-
-        // Event: When an error occurs while reading the file
-        fileStream.on('error', (error) => {
-          console.log(`Error reading file '${fileName}':`, error);
+        // Read the file as binary data
+        fs.readFile(filePath, (err, data) => {
+          if (err) {
+            console.error('Error reading file:', err);
+            return;
+          }
+          
+          // Send the file as binary data over WebSocket
+          ws.send(data, { binary: true }, (err) => {
+            if (err) {
+              console.error('Error sending file:', err);
+            } else {
+              console.log('File sent successfully');
+              ws.send('downloadComplete')
+            }
+          });
         });
       } else {
         ws.send('File not found');

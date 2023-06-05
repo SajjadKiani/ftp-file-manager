@@ -20,7 +20,7 @@ socket.addEventListener('message', (event) => {
   console.log('Received message:', message);
 
   // check if the message is a files list
-  if (message.startsWith('{')) {
+  if (typeof message === 'string' && message.startsWith('{')) {
     const file = JSON.parse(message);
 
     // display the files list
@@ -55,12 +55,26 @@ document.getElementById('file-container').addEventListener('click', (event) => {
     const fileName = target.getAttribute('data-file');
     socket.send(`download:${fileName}`);
 
-    // create a temporary link to download the file
-    const link = document.createElement('a');
-    link.setAttribute('href', '#');
-    link.setAttribute('download', fileName);
-    console.log(link);
-    link.click();
+    // get file content from the server
+    socket.addEventListener('message', (event) => {
+      const fileData = event.data;
+  
+      // Convert the binary data to a Blob
+      const fileBlob = new Blob([fileData]);
+      
+      // Create a temporary URL for the Blob
+      const fileURL = URL.createObjectURL(fileBlob);
+      
+      // Create a temporary anchor element to trigger the file download
+      const downloadLink = document.createElement('a');
+      downloadLink.href = fileURL;
+      downloadLink.download = fileName; // Specify the desired file name
+      
+      downloadLink.click();
+      
+      // Cleanup - revoke the temporary URL
+      URL.revokeObjectURL(fileURL);
+    })
 
   }
 });
