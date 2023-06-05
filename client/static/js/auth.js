@@ -10,11 +10,7 @@ document.getElementById('login-form').onsubmit = (e) => {
         console.log('WebSocket connection established.');
 
         // send authentication message to the server
-        socket.send(JSON.stringify({
-            type: 'auth',
-            username: username,
-            password: password
-        }));
+        socket.send('auth:' + username + ':' + password);
 
     });
 

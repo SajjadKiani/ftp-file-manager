@@ -10,11 +10,13 @@ wss.on('connection', (ws) => {
 
   // Event: When a message is received from a client
   ws.on('message', (message) => {
-    const data = JSON.parse(message);
+    const data = message.toString();
     console.log('Received message:', data);
 
-    if (data.type === 'auth') {
-      const { username, password } = data;
+    if (data.startsWith('auth')) {
+      const username = data.split(':')[1];
+      const password = data.split(':')[2];
+
       const isAuth = authenticateUser(username, password);
 
       if (isAuth) {
@@ -26,7 +28,7 @@ wss.on('connection', (ws) => {
       }
     }
 
-    else if (data.type === 'list') {
+    else if (ws.isAuth && data.startsWith('list')) {
 
       // if directory does not exist, create it
       if (!fs.existsSync('files'))
@@ -60,8 +62,8 @@ wss.on('connection', (ws) => {
     }
 
     // Check if the message is a command to upload a file
-    else if (ws.isAuth && data.type === 'upload') {
-      const fileName = data.fileName;
+    else if (ws.isAuth && data.startsWith('upload')) {
+      const fileName = data.split(':')[1];
       const fileStream = fs.createWriteStream(`files/${fileName}`);
 
       // Event: When a chunk of data is received from the client
@@ -78,17 +80,18 @@ wss.on('connection', (ws) => {
     }
 
     // Check if the message is a command to download a file
-    else if (ws.isAuth && data.type === 'download') {
-      const fileName = data.fileName;
+    else if (ws.isAuth && data.startsWith('download') ) {
+      const fileName = data.split(':')[1];
       const filePath = `files/${fileName}`;
 
       // Check if the file exists
+      console.log(filePath);
       if (fs.existsSync(filePath)) {
         const fileStream = fs.createReadStream(filePath);
 
         // Event: When the file is opened for reading
-        fileStream.on('open', () => {
-          fileStream.pipe(ws);
+        fileStream.on('open', (ws) => {
+          fileStream.read(ws)
         });
 
         // Event: When the file read stream is finished
@@ -105,8 +108,10 @@ wss.on('connection', (ws) => {
       }
     }
 
-    else {
+    else if (!ws.isAuth) {
       ws.send('authenticationFailed');
+    } else {
+      ws.send('Unknown command');
     }
   });
 

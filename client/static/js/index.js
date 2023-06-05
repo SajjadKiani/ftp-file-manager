@@ -4,16 +4,10 @@ socket.addEventListener('open', () => {
   console.log('WebSocket connection established.');
 
   // send authentication message to the server
-  socket.send(JSON.stringify({
-    type: 'auth',
-    username: 'admin',
-    password: 'admin',
-  }));
+  socket.send('auth:' + 'admin' + ':' + 'admin');
 
   // send list message to the server
-  socket.send(JSON.stringify({
-    type: 'list',
-  }));
+  socket.send('list');
 
 });
 
@@ -59,10 +53,7 @@ document.getElementById('file-container').addEventListener('click', (event) => {
   // check if the target is a download button
   if (target.classList.contains('btn')) {
     const fileName = target.getAttribute('data-file');
-    socket.send(JSON.stringify({
-      type: 'download',
-      file: fileName,
-    }));
+    socket.send(`download:${fileName}`);
 
     // create a temporary link to download the file
     const link = document.createElement('a');
@@ -82,10 +73,7 @@ document.getElementById('btn-upload').addEventListener('click', (e) => {
 
   // check if a file is selected
   if (file) {
-    socket.send(JSON.stringify({
-      type: 'upload',
-      file: file,
-    }));
+    socket.send(`upload:${file.name}`);
 
     // read the file content and send it to the server
     const fileReader = new FileReader();
