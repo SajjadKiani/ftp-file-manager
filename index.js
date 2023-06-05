@@ -6,51 +6,62 @@ const wss = new WebSocketServer({ port: 8080 });
 
 // Event: When a client connects to the server
 wss.on('connection', (ws) => {
-  console.log('A new client connected.');
-
-  // show file directory to client
-
-  // if directory does not exist, create it
-  if (!fs.existsSync('files'))
-    fs.mkdirSync('files');
-
-  fs.readdir('files', (err, files) => {
-    
-    if (err) {
-        console.log('Error reading directory:', err);
-        return;
-    }
-
-    // send file name, size and date modified date list to client
-    files.forEach((file) => {
-        fs.stat(`files/${file}`, (err, stats) => {
-            if (err) {
-                console.log(`Error reading file '${file}':`, err);
-                return;
-            }
-    
-            ws.send(JSON.stringify( {
-                name: file,
-                size: stats.size,
-                modified: stats.mtime,
-                type: stats.isFile() ? 'file' : 'directory',
-            }))
-        });
-    });
-
-  });
-
-
-
+  console.log('A new client!' );
 
   // Event: When a message is received from a client
   ws.on('message', (message) => {
-    message = message.toString();
-    console.log('Received message:', message);
+    const data = JSON.parse(message);
+    console.log('Received message:', data);
+
+    if (data.type === 'auth') {
+      const { username, password } = data;
+      const isAuth = authenticateUser(username, password);
+
+      if (isAuth) {
+        ws.isAuth = true;
+        ws.username = username;
+        ws.send('authenticated');
+      } else {
+        ws.send('authenticationFailed');
+      }
+    }
+
+    else if (data.type === 'list') {
+
+      // if directory does not exist, create it
+      if (!fs.existsSync('files'))
+        fs.mkdirSync('files');
+
+      // read directory
+      fs.readdir('files', (err, files) => {
+        
+        if (err) {
+            console.log('Error reading directory:', err);
+            return;
+        }
+
+        // send file name, size and date modified date list to client
+        files.forEach((file) => {
+            fs.stat(`files/${file}`, (err, stats) => {
+                if (err) {
+                    console.log(`Error reading file '${file}':`, err);
+                    return;
+                }
+        
+                ws.send(JSON.stringify( {
+                    name: file,
+                    size: stats.size,
+                    modified: stats.mtime,
+                    type: stats.isFile() ? 'file' : 'directory',
+                }))
+            });
+        });
+      });
+    }
 
     // Check if the message is a command to upload a file
-    if (typeof message === 'string' && message.startsWith('upload:')) {
-      const fileName = message.split(':')[1];
+    else if (ws.isAuth && data.type === 'upload') {
+      const fileName = data.fileName;
       const fileStream = fs.createWriteStream(`files/${fileName}`);
 
       // Event: When a chunk of data is received from the client
@@ -67,8 +78,8 @@ wss.on('connection', (ws) => {
     }
 
     // Check if the message is a command to download a file
-    if (typeof message === 'string' && message.startsWith('download:')) {
-      const fileName = message.split(':')[1];
+    else if (ws.isAuth && data.type === 'download') {
+      const fileName = data.fileName;
       const filePath = `files/${fileName}`;
 
       // Check if the file exists
@@ -93,6 +104,10 @@ wss.on('connection', (ws) => {
         ws.send('File not found');
       }
     }
+
+    else {
+      ws.send('authenticationFailed');
+    }
   });
 
   // Event: When a client disconnects from the server
@@ -102,3 +117,8 @@ wss.on('connection', (ws) => {
 });
 
 console.log('WebSocket server is running on port 8080.');
+
+
+function authenticateUser(username, password) {
+  return username === 'admin' && password === 'admin';
+}

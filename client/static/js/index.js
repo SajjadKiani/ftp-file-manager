@@ -2,6 +2,19 @@ const socket = new WebSocket('ws://localhost:8080');
 
 socket.addEventListener('open', () => {
   console.log('WebSocket connection established.');
+
+  // send authentication message to the server
+  socket.send(JSON.stringify({
+    type: 'auth',
+    username: 'admin',
+    password: 'admin',
+  }));
+
+  // send list message to the server
+  socket.send(JSON.stringify({
+    type: 'list',
+  }));
+
 });
 
 
@@ -29,7 +42,7 @@ socket.addEventListener('message', (event) => {
           ${file.name}</td>
       <td>${changeSize(file.size)}</td>
       <td>${changeTime(file.modified)}</td>
-      <td>  <button class="btn text-primary" data-file="${file.name}"><i class="bi bi-download"></i></button>`;
+      <td>  <button class="btn text-primary" data-file="${file.name}"><i class="bi bi-download"></i></button></td>`;
 
     filesList.appendChild(fileElement);
   }
@@ -46,7 +59,18 @@ document.getElementById('file-container').addEventListener('click', (event) => {
   // check if the target is a download button
   if (target.classList.contains('btn')) {
     const fileName = target.getAttribute('data-file');
-    socket.send(`download:${fileName}`);
+    socket.send(JSON.stringify({
+      type: 'download',
+      file: fileName,
+    }));
+
+    // create a temporary link to download the file
+    const link = document.createElement('a');
+    link.setAttribute('href', '#');
+    link.setAttribute('download', fileName);
+    console.log(link);
+    link.click();
+
   }
 });
 
@@ -58,7 +82,10 @@ document.getElementById('btn-upload').addEventListener('click', (e) => {
 
   // check if a file is selected
   if (file) {
-    socket.send(`upload:${file.name}`);
+    socket.send(JSON.stringify({
+      type: 'upload',
+      file: file,
+    }));
 
     // read the file content and send it to the server
     const fileReader = new FileReader();
