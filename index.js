@@ -11,7 +11,9 @@ wss.on('connection', (ws) => {
   // Event: When a message is received from a client
   ws.on('message', (message) => {
     const data = message.toString();
+    // if (!data instanceof Buffer) {
     console.log('Received message:', data);
+    // }
 
     if (data.startsWith('auth')) {
       const username = data.split(':')[1];
@@ -64,19 +66,22 @@ wss.on('connection', (ws) => {
     // Check if the message is a command to upload a file
     else if (ws.isAuth && data.startsWith('upload')) {
       const fileName = data.split(':')[1];
-      const fileStream = fs.createWriteStream(`files/${fileName}`);
 
-      // Event: When a chunk of data is received from the client
-      ws.on('message', (chunk) => {
-        fileStream.write(chunk);
-      });
-
-      // Event: When the file upload is completed
-      ws.on('close', () => {
-        fileStream.end();
-        console.log(`File '${fileName}' uploaded successfully.`);
-        ws.send('uploadComplete')
-      });
+      // get file content from the client
+      ws.on('message', (message) => {
+        // if message is instance of Buffer, then it is a file
+        if (message instanceof Buffer) {
+          // write file to the server
+          fs.writeFile(`files/${fileName}`, message, (err) => {
+            if (err) {
+              console.error('Error writing file:', err);
+              return;
+            }
+            console.log('File saved successfully');
+            ws.send('uploadComplete');
+          });
+        }
+      })
     }
 
     // Check if the message is a command to download a file
@@ -85,7 +90,6 @@ wss.on('connection', (ws) => {
       const filePath = `files/${fileName}`;
 
       // Check if the file exists
-      console.log(filePath);
       if (fs.existsSync(filePath)) {
         // Read the file as binary data
         fs.readFile(filePath, (err, data) => {
@@ -111,8 +115,8 @@ wss.on('connection', (ws) => {
 
     else if (!ws.isAuth) {
       ws.send('authenticationFailed');
-    } else {
-      ws.send('Unknown command');
+    } else if (!message instanceof Buffer) {
+      console.log('**** Received message:', data);
     }
   });
 

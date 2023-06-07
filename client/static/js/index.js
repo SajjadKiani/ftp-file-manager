@@ -1,3 +1,21 @@
+toastr.options = {
+  "closeButton": false,
+  "debug": false,
+  "newestOnTop": false,
+  "progressBar": false,
+  "positionClass": "toast-bottom-right",
+  "preventDuplicates": false,
+  "onclick": null,
+  "showDuration": "300",
+  "hideDuration": "1000",
+  "timeOut": "5000",
+  "extendedTimeOut": "1000",
+  "showEasing": "swing",
+  "hideEasing": "linear",
+  "showMethod": "fadeIn",
+  "hideMethod": "fadeOut"
+}
+
 const socket = new WebSocket('ws://localhost:8080');
 
 socket.addEventListener('open', () => {
@@ -39,6 +57,12 @@ socket.addEventListener('message', (event) => {
       <td>  <button class="btn text-primary" data-file="${file.name}"><i class="bi bi-download"></i></button></td>`;
 
     filesList.appendChild(fileElement);
+  } else if (typeof message === 'string' && message.startsWith('downloadComplete')) {
+    // display a success message
+    toastr.success('File downloaded successfully.');
+  } else if (typeof message === 'string' && message.startsWith('uploadComplete')) {
+    // display a success message
+    toastr.success('File uploaded successfully.');
   }
 });
 
@@ -57,23 +81,17 @@ document.getElementById('file-container').addEventListener('click', (event) => {
 
     // get file content from the server
     socket.addEventListener('message', (event) => {
-      const fileData = event.data;
-  
-      // Convert the binary data to a Blob
-      const fileBlob = new Blob([fileData]);
-      
-      // Create a temporary URL for the Blob
-      const fileURL = URL.createObjectURL(fileBlob);
-      
-      // Create a temporary anchor element to trigger the file download
-      const downloadLink = document.createElement('a');
-      downloadLink.href = fileURL;
-      downloadLink.download = fileName; // Specify the desired file name
-      
-      downloadLink.click();
-      
-      // Cleanup - revoke the temporary URL
-      URL.revokeObjectURL(fileURL);
+      if (typeof event.data === 'object') {
+        const fileContent = event.data;
+
+        // create a link element to download the file
+        const link = document.createElement('a');
+        link.setAttribute('href', URL.createObjectURL(new Blob([fileContent])));
+        link.setAttribute('download', fileName);
+        link.click();
+
+        console.log(link)
+      }
     })
 
   }
