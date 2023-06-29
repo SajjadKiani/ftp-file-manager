@@ -1,0 +1,82 @@
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Client</title>
+
+
+    <!-- bootstrap -->
+    <link rel="stylesheet" href="./static/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="./static/css/bootstrap-icons.min.css" />
+    <script src="./static/js/bootstrap.bundle.min.js"></script>
+
+    <!--  jquery  -->
+    <script src="./static/js/jquery-3.7.0.min.js"></script>
+
+    <!--  toast  -->
+    <link rel="stylesheet" href="./static/css/toastr.min.css" />
+    <script src="./static/js/toastr.min.js"></script>
+
+</head>
+<body>
+    <div class="container">
+        <div class="row mt-3">
+            
+        </div>
+
+        <div class="border rounded-4 container-fluid mt-5">
+            <div class="row justify-content-between pt-3">
+                <div class="col-10"><h1>FTP WebServer</h1></div>
+                <div class="col-2">
+                    <button class="btn btn-success"data-bs-toggle="modal" data-bs-target="#exampleModal">
+                        Upload <i class="bi bi-upload"></i>
+                    </button>
+                </div>                  
+            </div>
+            <hr>
+            <table class="table table-hover">
+                <thead>
+                  <tr>
+                    <th scope="col">#</th>
+                    <th scope="col">name</th>
+                    <th scope="col">size</th>
+                    <th scope="col">modified</th>
+                    <th scope="col">action</th>
+                  </tr>
+                </thead>
+                <tbody id="file-container">
+                </tbody>
+            </table>
+        </div>
+    </div>
+</body>
+
+  
+  <!-- Modal -->
+  <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="exampleModalLabel">Upload File</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <div class="input-group">
+            <input type="file" class="form-control" id="file-input">
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+          <button id="btn-upload" type="button" data-bs-dismiss="modal" class="btn btn-primary">Upload</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+
+<script>
+
+</script>
+<script src="./static/js/index.js" type="module"></script>
+</html>

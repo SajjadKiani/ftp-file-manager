@@ -1,0 +1,44 @@
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Login</title>
+    
+    
+        <!-- bootstrap -->
+        <link rel="stylesheet" href="./static/css/bootstrap.min.css" />
+        <link rel="stylesheet" href="./static/css/bootstrap-icons.min.css" />
+        <script src="./static/js/bootstrap.bundle.min.js"></script>
+    
+    </head>
+<body>
+    <div class="container vh-100">
+        <div class="row justify-content-center align-items-center h-100">
+            <div class="col-md-5">
+                <div class="card">
+                    <form id="login-form">
+                        <div class="card-header">Login</div>
+                        <div class="card-body">
+                            <div class="mb-3">
+                                <label for="username" class="form-label">Username</label>
+                                <input class="form-control" id="username">
+                            </div>
+                            <div class="mb-3">
+                                <label for="password" class="form-label">Password</label>
+                                <input type="password" class="form-control" id="password">
+                            </div>
+
+                            <div class="text-danger" id="error"></div>
+                        </div>
+                        <div class="card-footer">
+                            <button type="submit" class="btn btn-primary">login</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+<script src="./static/js/auth.js" type="module"></script>
+</html>
